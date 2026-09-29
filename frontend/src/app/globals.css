@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --brand-navy: #0b1329;
+    --brand-navy-light: #16203d;
+    --brand-amber: #f59e0b;
+    --brand-amber-hover: #d97706;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #0b1120;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+/* Custom scrollbar for enterprise table and modals */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Pulse glow animation for real-time status */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.8);
+  }
+}
+
+.glow-amber {
+  animation: pulse-glow 2.5s infinite;
+}
+
+/* Table row highlight for freshly arrived leads */
+@keyframes highlight-lead {
+  0% {
+    background-color: rgba(245, 158, 11, 0.25);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-new-lead {
+  animation: highlight-lead 4s ease-out;
+}
