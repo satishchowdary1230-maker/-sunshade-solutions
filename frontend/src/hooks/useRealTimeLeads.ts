@@ -119,49 +119,54 @@ export function useRealTimeLeads(statusFilter?: string, searchQuery?: string): U
     setLeads((prev) => prev.filter((item) => item._id !== payload.id));
   }, []);
 
-  // Connect to Backend Socket.io and SSE fallback
+  // Connect to Backend Socket.io or direct SSE on Vercel
   useEffect(() => {
     let isConnectedWithSocket = false;
 
-    try {
-      const socket = io(BACKEND_URL, {
-        path: '/socket.io',
-        transports: ['websocket', 'polling'],
-        timeout: 4000,
-        reconnectionAttempts: 5,
-      });
-      socketRef.current = socket;
+    if (BACKEND_URL && BACKEND_URL.startsWith('http')) {
+      try {
+        const socket = io(BACKEND_URL, {
+          path: '/socket.io',
+          transports: ['websocket', 'polling'],
+          timeout: 4000,
+          reconnectionAttempts: 2,
+        });
+        socketRef.current = socket;
 
-      socket.on('connect', () => {
-        isConnectedWithSocket = true;
-        setConnectionStatus('connected');
-        setTransportType('Socket.io');
-      });
+        socket.on('connect', () => {
+          isConnectedWithSocket = true;
+          setConnectionStatus('connected');
+          setTransportType('Socket.io');
+        });
 
-      socket.on('new_lead', (lead) => {
-        handleIncomingLead(lead);
-      });
+        socket.on('new_lead', (lead) => {
+          handleIncomingLead(lead);
+        });
 
-      socket.on('lead_updated', (lead) => {
-        handleIncomingUpdate(lead);
-      });
+        socket.on('lead_updated', (lead) => {
+          handleIncomingUpdate(lead);
+        });
 
-      socket.on('lead_deleted', (payload) => {
-        handleIncomingDelete(payload);
-      });
+        socket.on('lead_deleted', (payload) => {
+          handleIncomingDelete(payload);
+        });
 
-      socket.on('connect_error', () => {
-        if (!isConnectedWithSocket && !eventSourceRef.current) {
-          initSSE();
-        }
-      });
-    } catch {
+        socket.on('connect_error', () => {
+          if (!isConnectedWithSocket && !eventSourceRef.current) {
+            initSSE();
+          }
+        });
+      } catch {
+        initSSE();
+      }
+    } else {
       initSSE();
     }
 
     function initSSE() {
       try {
-        const es = new EventSource(`${BACKEND_URL}/api/leads/stream`);
+        const streamUrl = BACKEND_URL ? `${BACKEND_URL}/api/leads/stream` : '/api/leads/stream';
+        const es = new EventSource(streamUrl);
         eventSourceRef.current = es;
 
         es.addEventListener('connected', () => {

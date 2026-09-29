@@ -1,8 +1,16 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000');
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(siteUrl),
   title: 'Sunshade Solutions | Architectural Tensile Structures & Industrial Sheds Hyderabad',
   description:
     'Premier industrial manufacturer of architectural tensile fabric structures, commercial car parking sheds, polycarbonate canopies, and PEB steel sheds in Mallapur IDA, Hyderabad. Contact S.C. Sharma: +91 99513 54848.',

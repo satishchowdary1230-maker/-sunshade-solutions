@@ -1,8 +1,8 @@
 export const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  process.env.NEXT_PUBLIC_API_URL || '';
 
 export async function apiRequest(path: string, options: RequestInit = {}) {
-  const url = `${BACKEND_URL}${path}`;
+  const url = BACKEND_URL ? `${BACKEND_URL}${path}` : path;
   try {
     const res = await fetch(url, {
       ...options,
@@ -13,18 +13,21 @@ export async function apiRequest(path: string, options: RequestInit = {}) {
     });
     return await res.json();
   } catch (error) {
-    // If backend direct call fails, try relative Next.js fallback
-    try {
-      const fallbackRes = await fetch(path, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {}),
-        },
-      });
-      return await fallbackRes.json();
-    } catch {
-      throw error;
+    // If backend direct call fails and BACKEND_URL was set, try relative Next.js fallback
+    if (BACKEND_URL) {
+      try {
+        const fallbackRes = await fetch(path, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+          },
+        });
+        return await fallbackRes.json();
+      } catch {
+        throw error;
+      }
     }
+    throw error;
   }
 }
